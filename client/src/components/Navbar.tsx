@@ -63,6 +63,15 @@ export function Navbar() {
                   Profile
                 </div>
               </Link>
+              <Link href='/requests' data-testid='link-requests'>
+                <div
+                  className={`px-4 py-2 rounded-md font-medium transition-all hover-elevate active-elevate-2 cursor-pointer ${
+                    location === '/requests' ? 'bg-accent text-black' : ''
+                  }`}
+                >
+                  Requests
+                </div>
+              </Link>
             </div>
           )}
 
@@ -89,23 +98,23 @@ export function Navbar() {
                   >
                     <Avatar className='w-8 h-8'>
                       <AvatarFallback className='bg-primary text-primary-foreground text-sm'>
-                        {getInitials(user.name)}
+                        {getInitials(user?.name ?? '')}
                       </AvatarFallback>
                     </Avatar>
                     <span className='hidden sm:inline font-medium'>
-                      {user.name}
+                      {user?.name}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align='end' className='w-56 text-black'>
                   <DropdownMenuLabel>
                     <div className='flex flex-col gap-1'>
-                      <p className='font-medium'>{user.name}</p>
+                      <p className='font-medium'>{user?.name}</p>
                       <p className='text-xs text-muted-foreground'>
-                        {user.email}
+                        {user?.email}
                       </p>
                       <p className='text-xs font-medium text-black capitalize'>
-                        {user.role}
+                        {user?.role}
                       </p>
                     </div>
                   </DropdownMenuLabel>

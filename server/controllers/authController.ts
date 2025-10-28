@@ -24,11 +24,15 @@ export const register = async (req: Request, res: Response) => {
     }
 
     if (!['student', 'tutor'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role. Must be student or tutor' });
+      return res
+        .status(400)
+        .json({ message: 'Invalid role. Must be student or tutor' });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+      return res
+        .status(400)
+        .json({ message: 'Password must be at least 6 characters' });
     }
 
     // Check if user exists
@@ -54,7 +58,8 @@ export const register = async (req: Request, res: Response) => {
       throw new Error('JWT_SECRET not configured');
     }
 
-    const token = jwt.sign({ userId: user._id.toString() }, jwtSecret, { expiresIn: '7d' });
+    const uid = String((user as any)._id);
+    const token = jwt.sign({ userId: uid }, jwtSecret, { expiresIn: '7d' });
 
     res.status(201).json({ user: transformUser(user), token });
   } catch (error) {
@@ -69,7 +74,9 @@ export const login = async (req: Request, res: Response) => {
 
     // Validate input
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+      return res
+        .status(400)
+        .json({ message: 'Email and password are required' });
     }
 
     // Find user
@@ -90,7 +97,8 @@ export const login = async (req: Request, res: Response) => {
       throw new Error('JWT_SECRET not configured');
     }
 
-    const token = jwt.sign({ userId: user._id.toString() }, jwtSecret, { expiresIn: '7d' });
+    const uid = String((user as any)._id);
+    const token = jwt.sign({ userId: uid }, jwtSecret, { expiresIn: '7d' });
 
     res.status(200).json({ user: transformUser(user), token });
   } catch (error) {

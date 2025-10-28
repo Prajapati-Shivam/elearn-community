@@ -1,9 +1,18 @@
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, Edit, Trash2 } from 'lucide-react';
 import type { Post } from '@shared/schema';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/context/AuthContext';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface PostCardProps {
   post: Post;
@@ -12,7 +21,34 @@ interface PostCardProps {
   isOwner?: boolean;
 }
 
-export function PostCard({ post, onEdit, onDelete, isOwner = false }: PostCardProps) {
+export function PostCard({
+  post,
+  onEdit,
+  onDelete,
+  isOwner = false,
+}: PostCardProps) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const handleRequestToTeach = async () => {
+    try {
+      await apiRequest('POST', `/api/posts/${post.id}/requests`);
+      toast({
+        title: 'Request sent',
+        description: 'Tutor request sent to the student.',
+      });
+      // refresh tutor's outgoing list and student's incoming lists
+      queryClient.invalidateQueries({ queryKey: ['/api/requests'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-post-requests'] });
+    } catch (err: any) {
+      toast({
+        title: 'Request failed',
+        description: err?.message || 'Could not send request',
+      });
+    }
+  };
+
   const getLevelColor = (level: string) => {
     switch (level.toLowerCase()) {
       case 'beginner':
@@ -27,64 +63,92 @@ export function PostCard({ post, onEdit, onDelete, isOwner = false }: PostCardPr
   };
 
   return (
-    <Card className="hover-elevate transition-all duration-200 h-full flex flex-col" data-testid={`card-post-${post.id}`}>
-      <CardHeader className="space-y-3 pb-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-xl font-semibold line-clamp-2" data-testid={`text-title-${post.id}`}>
+    <Card
+      className='hover-elevate transition-all duration-200 h-full flex flex-col'
+      data-testid={`card-post-${post.id}`}
+    >
+      <CardHeader className='space-y-3 pb-4'>
+        <div className='flex items-start justify-between gap-2'>
+          <h3
+            className='text-xl font-semibold line-clamp-2'
+            data-testid={`text-title-${post.id}`}
+          >
             {post.title}
           </h3>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary" data-testid={`badge-subject-${post.id}`}>
+        <div className='flex flex-wrap gap-2'>
+          <Badge variant='secondary' data-testid={`badge-subject-${post.id}`}>
             {post.subject}
           </Badge>
-          <Badge className={getLevelColor(post.level)} data-testid={`badge-level-${post.id}`}>
+          <Badge
+            className={getLevelColor(post.level)}
+            data-testid={`badge-level-${post.id}`}
+          >
             {post.level}
           </Badge>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 pb-4">
-        <p className="text-sm text-muted-foreground line-clamp-3" data-testid={`text-description-${post.id}`}>
+      <CardContent className='flex-1 pb-4'>
+        <p
+          className='text-sm text-muted-foreground line-clamp-3'
+          data-testid={`text-description-${post.id}`}
+        >
           {post.description}
         </p>
-        <div className="flex flex-col gap-2 mt-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4" />
-            <span data-testid={`text-student-${post.id}`}>{post.studentName}</span>
+        <div className='flex flex-col gap-2 mt-4 text-sm text-muted-foreground'>
+          <div className='flex items-center gap-2'>
+            <User className='w-4 h-4' />
+            <span data-testid={`text-student-${post.id}`}>
+              {post.studentName}
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
+          <div className='flex items-center gap-2'>
+            <Calendar className='w-4 h-4' />
             <span data-testid={`text-date-${post.id}`}>
-              {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+              {formatDistanceToNow(new Date(post.createdAt), {
+                addSuffix: true,
+              })}
             </span>
           </div>
         </div>
       </CardContent>
 
-      {isOwner && (
-        <CardFooter className="pt-4 gap-2 border-t">
+      {isOwner ? (
+        <CardFooter className='pt-4 gap-2 border-t'>
           <Button
-            variant="outline"
-            size="sm"
+            variant='outline'
+            size='sm'
             onClick={() => onEdit?.(post)}
-            className="flex-1"
+            className='flex-1'
             data-testid={`button-edit-${post.id}`}
           >
-            <Edit className="w-4 h-4 mr-2" />
+            <Edit className='w-4 h-4 mr-2' />
             Edit
           </Button>
           <Button
-            variant="destructive"
-            size="sm"
+            variant='destructive'
+            size='sm'
             onClick={() => onDelete?.(post.id)}
-            className="flex-1"
+            className='flex-1'
             data-testid={`button-delete-${post.id}`}
           >
-            <Trash2 className="w-4 h-4 mr-2" />
+            <Trash2 className='w-4 h-4 mr-2' />
             Delete
           </Button>
         </CardFooter>
+      ) : (
+        user?.role === 'tutor' && (
+          <CardFooter className='pt-4 border-t'>
+            <Button
+              onClick={handleRequestToTeach}
+              className='w-full'
+              data-testid={`button-request-${post.id}`}
+            >
+              Request to Teach
+            </Button>
+          </CardFooter>
+        )
       )}
     </Card>
   );

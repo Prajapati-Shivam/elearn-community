@@ -1,5 +1,5 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { type User, type InsertUser } from '@shared/schema';
+import { randomUUID } from 'crypto';
 
 // modify the interface with any CRUD methods
 // you might need
@@ -22,14 +22,19 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
+    // storage previously referenced `username`; the shared schema uses `email`.
     return Array.from(this.users.values()).find(
-      (user) => user.username === username,
+      (user) => user.email === username
     );
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user: User = {
+      ...insertUser,
+      id,
+      createdAt: new Date(),
+    } as unknown as User;
     this.users.set(id, user);
     return user;
   }
