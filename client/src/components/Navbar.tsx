@@ -38,7 +38,7 @@ export function Navbar() {
           <Link href='/' data-testid='link-home'>
             <div className='flex items-center gap-2 hover-elevate active-elevate-2 px-3 py-2 rounded-md transition-all cursor-pointer'>
               <GraduationCap className='w-8 h-8 text-primary' />
-              <span className='text-xl font-semibold'>Learning Community</span>
+              <span className='text-xl font-semibold'>StudyBuddy</span>
             </div>
           </Link>
 
@@ -106,14 +106,14 @@ export function Navbar() {
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align='end' className='w-56 text-black'>
+                <DropdownMenuContent align='end' className='w-56 bg-black'>
                   <DropdownMenuLabel>
                     <div className='flex flex-col gap-1'>
                       <p className='font-medium'>{user?.name}</p>
                       <p className='text-xs text-muted-foreground'>
                         {user?.email}
                       </p>
-                      <p className='text-xs font-medium text-black capitalize'>
+                      <p className='text-xs font-medium capitalize'>
                         {user?.role}
                       </p>
                     </div>

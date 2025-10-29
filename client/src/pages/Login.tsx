@@ -4,7 +4,14 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { GraduationCap, Loader2 } from 'lucide-react';
 
@@ -42,7 +49,10 @@ export default function Login() {
     } catch (error) {
       toast({
         title: 'Login failed',
-        description: error instanceof Error ? error.message : 'Please check your credentials and try again.',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Please check your credentials and try again.',
         variant: 'destructive',
       });
     } finally {
@@ -51,17 +61,17 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-4">
-            <div className="flex justify-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-primary" />
+    <div className='flex flex-col min-h-screen'>
+      <div className='flex-1 flex items-center justify-center px-4 py-12'>
+        <Card className='w-full max-w-md'>
+          <CardHeader className='space-y-4'>
+            <div className='flex justify-center'>
+              <div className='w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center'>
+                <GraduationCap className='w-6 h-6 text-primary' />
               </div>
             </div>
-            <div className="space-y-2 text-center">
-              <CardTitle className="text-2xl">Welcome Back</CardTitle>
+            <div className='space-y-2 text-center'>
+              <CardTitle className='text-2xl'>Welcome Back</CardTitle>
               <CardDescription>
                 Sign in to your account to continue learning
               </CardDescription>
@@ -69,46 +79,46 @@ export default function Login() {
           </CardHeader>
 
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+            <CardContent className='space-y-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='email'>Email</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
+                  id='email'
+                  type='email'
+                  placeholder='you@example.com'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-12"
-                  data-testid="input-email"
+                  className='h-12'
+                  data-testid='input-email'
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+              <div className='space-y-2'>
+                <Label htmlFor='password'>Password</Label>
                 <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
+                  id='password'
+                  type='password'
+                  placeholder='••••••••'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-12"
-                  data-testid="input-password"
+                  className='h-12'
+                  data-testid='input-password'
                 />
               </div>
             </CardContent>
 
-            <CardFooter className="flex flex-col gap-4">
+            <CardFooter className='flex flex-col gap-4'>
               <Button
-                type="submit"
-                className="w-full h-12"
+                type='submit'
+                className='w-full h-12'
                 disabled={isLoading}
-                data-testid="button-submit"
+                data-testid='button-submit'
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader2 className='w-4 h-4 mr-2 animate-spin' />
                     Signing in...
                   </>
                 ) : (
@@ -116,10 +126,10 @@ export default function Login() {
                 )}
               </Button>
 
-              <p className="text-sm text-center text-muted-foreground">
+              <p className='text-sm text-center text-muted-foreground'>
                 Don't have an account?{' '}
-                <Link href="/signup" data-testid="link-signup">
-                  <span className="text-primary font-medium hover:underline cursor-pointer">
+                <Link href='/signup' data-testid='link-signup'>
+                  <span className='text-primary font-medium hover:underline cursor-pointer'>
                     Sign up
                   </span>
                 </Link>

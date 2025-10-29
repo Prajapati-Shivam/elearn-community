@@ -185,7 +185,7 @@ export default function RequestsPage() {
                           {renderStatusBadge(r.status)}
                         </CardHeader>
                         {r.status === 'pending' && (
-                          <CardFooter className='flex gap-3 pt-2'>
+                          <CardFooter className='flex justify-center gap-3 pt-2'>
                             <Button
                               size='sm'
                               onClick={() =>

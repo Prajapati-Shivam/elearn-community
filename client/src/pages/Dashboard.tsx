@@ -264,7 +264,7 @@ export default function Dashboard() {
                 >
                   <SelectValue placeholder='Filter by subject' />
                 </SelectTrigger>
-                <SelectContent className='text-black'>
+                <SelectContent className='bg-black'>
                   <SelectItem value='all'>All Subjects</SelectItem>
                   {subjects.map((subject) => (
                     <SelectItem key={subject} value={subject.toLowerCase()}>
