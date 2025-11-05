@@ -30,6 +30,7 @@ async function seedDatabase() {
       email: 'bob@example.com',
       password: hashedPassword,
       role: 'tutor',
+      subjects: ['Mathematics', 'Physics'],
     });
 
     console.log('✅ Created tutor user: bob@example.com / password123');
@@ -38,7 +39,8 @@ async function seedDatabase() {
     await Post.create({
       title: 'Need Help with Calculus - Derivatives',
       subject: 'Mathematics',
-      description: 'I am struggling with understanding derivatives and their applications. Looking for a tutor who can explain the concepts clearly and help me solve practice problems. I have an exam coming up next week.',
+      description:
+        'I am struggling with understanding derivatives and their applications. Looking for a tutor who can explain the concepts clearly and help me solve practice problems. I have an exam coming up next week.',
       level: 'intermediate',
       studentId: student._id,
       studentName: student.name,
@@ -50,7 +52,8 @@ async function seedDatabase() {
     await Post.create({
       title: 'Learn React Hooks and State Management',
       subject: 'Programming',
-      description: 'I am new to React and want to understand hooks, especially useState and useEffect. Also interested in learning about state management patterns and best practices.',
+      description:
+        'I am new to React and want to understand hooks, especially useState and useEffect. Also interested in learning about state management patterns and best practices.',
       level: 'beginner',
       studentId: student._id,
       studentName: student.name,

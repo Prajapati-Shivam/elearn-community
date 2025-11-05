@@ -33,7 +33,9 @@ export default function Dashboard() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
-  const [filterSubject, setFilterSubject] = useState<string>('all');
+  const [filterSubject, setFilterSubject] = useState<string>(
+    user?.role === 'tutor' ? 'my-subjects' : 'all'
+  );
 
   // Form state
   const [title, setTitle] = useState('');
@@ -158,11 +160,16 @@ export default function Dashboard() {
   };
 
   // Filter posts
-  const filteredPosts = posts.filter(
-    (post) =>
-      filterSubject === 'all' ||
-      post.subject.toLowerCase().includes(filterSubject.toLowerCase())
-  );
+  const filteredPosts = posts.filter((post) => {
+    if (filterSubject === 'all') return true;
+    if (filterSubject === 'my-subjects' && user?.role === 'tutor') {
+      const userSubjects = (user?.subjects || []).map((s: string) =>
+        s.toLowerCase()
+      );
+      return userSubjects.includes(post.subject.toLowerCase());
+    }
+    return post.subject.toLowerCase().includes(filterSubject.toLowerCase());
+  });
 
   // Get unique subjects for filter
   const subjects = Array.from(new Set(posts.map((p) => p.subject)));
@@ -266,6 +273,9 @@ export default function Dashboard() {
                 </SelectTrigger>
                 <SelectContent className='bg-black'>
                   <SelectItem value='all'>All Subjects</SelectItem>
+                  {user?.role === 'tutor' && (
+                    <SelectItem value='my-subjects'>My Subjects</SelectItem>
+                  )}
                   {subjects.map((subject) => (
                     <SelectItem key={subject} value={subject.toLowerCase()}>
                       {subject}
@@ -299,12 +309,12 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h3 className='text-xl font-semibold mb-2'>
-                    No learning requests yet
+                    No learning requests yet.
                   </h3>
                   <p className='text-muted-foreground'>
                     {user?.role === 'student'
                       ? 'Create your first learning request to get started'
-                      : 'Check back later when students post new requests'}
+                      : 'Try adding Subject in your profile or Check back later when students post new requests'}
                   </p>
                 </div>
                 {user?.role === 'student' && (

@@ -72,6 +72,17 @@ export function Navbar() {
                   Requests
                 </div>
               </Link>
+              {user?.role === 'student' && (
+                <Link href='/tutors' data-testid='link-tutors'>
+                  <div
+                    className={`px-4 py-2 rounded-md font-medium transition-all hover-elevate active-elevate-2 cursor-pointer ${
+                      location === '/tutors' ? 'bg-accent text-black' : ''
+                    }`}
+                  >
+                    Tutors
+                  </div>
+                </Link>
+              )}
             </div>
           )}
 

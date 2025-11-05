@@ -11,17 +11,26 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Clock, Inbox } from 'lucide-react';
 
 export default function RequestsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: myRequests = [], isLoading: tutorLoading } = useQuery<any[]>({
+  const {
+    data: myRequestsData = { sent: [], received: [] },
+    isLoading: tutorLoading,
+  } = useQuery<{ sent: any[]; received: any[] } | null>({
     queryKey: ['/api/requests'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/requests');
+      return res.json();
+    },
     enabled: !!user && user.role === 'tutor',
   });
+
+  const myRequests = myRequestsData || { sent: [], received: [] };
 
   const { data: postsRequests = [], isLoading: studentLoading } = useQuery<
     any[]
@@ -76,19 +85,19 @@ export default function RequestsPage() {
     switch (status) {
       case 'accepted':
         return (
-          <Badge variant='default' className='flex items-center gap-1'>
+          <Badge className='bg-green-100 text-green-800 flex items-center gap-1'>
             <CheckCircle2 size={14} /> Accepted
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge variant='destructive' className='flex items-center gap-1'>
+          <Badge className='bg-red-100 text-red-700 flex items-center gap-1'>
             <XCircle size={14} /> Rejected
           </Badge>
         );
       default:
         return (
-          <Badge variant='outline' className='flex items-center gap-1'>
+          <Badge className='bg-yellow-100 text-yellow-700 flex items-center gap-1'>
             <Clock size={14} /> Pending
           </Badge>
         );
@@ -99,125 +108,207 @@ export default function RequestsPage() {
     tutorLoading || studentLoading || acceptRejectMutation.isPending;
 
   return (
-    <div className='max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8'>
-      <div className='flex items-center justify-between mb-6'>
-        <h2 className='text-3xl font-bold tracking-tight'>Requests</h2>
+    <div className='max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8'>
+      <div className='flex items-center justify-between mb-8'>
+        <h2 className='text-3xl font-bold tracking-tight text-foreground'>
+          {user?.role === 'tutor'
+            ? 'Tutor Requests Dashboard'
+            : 'Student Requests Dashboard'}
+        </h2>
         {isLoading && (
           <Loader2 className='animate-spin text-muted-foreground' size={24} />
         )}
       </div>
 
-      {/* Tutor View */}
+      {/* TUTOR VIEW */}
       {user?.role === 'tutor' && (
-        <section>
-          <h3 className='text-xl font-semibold mb-4 text-muted-foreground'>
-            Requests You’ve Sent
-          </h3>
-          <div className='grid gap-4'>
-            {myRequests.length === 0 ? (
-              <div className='text-center py-10 border rounded-lg'>
+        <>
+          {/* Received Requests */}
+          <section className='bg-muted/30 rounded-xl p-6 mb-10 shadow-sm'>
+            <h3 className='text-xl font-semibold mb-4 border-b pb-2 text-foreground'>
+              Requests You’ve Received
+            </h3>
+            {myRequests.received.length === 0 ? (
+              <div className='text-center py-12'>
+                <Inbox
+                  className='mx-auto mb-3 text-muted-foreground'
+                  size={40}
+                />
+                <p className='text-muted-foreground'>
+                  No requests from students yet.
+                </p>
+              </div>
+            ) : (
+              <div className='grid md:grid-cols-2 gap-5'>
+                {myRequests.received.map((r) => (
+                  <Card
+                    key={r.id}
+                    className='hover:shadow-lg transition-all border-border'
+                  >
+                    <CardHeader className='flex justify-between items-start'>
+                      <div>
+                        <h4 className='font-semibold text-lg'>
+                          {r.subject || 'Requested Subject'}
+                        </h4>
+                        <p className='text-sm text-muted-foreground'>
+                          Student: {r.studentName}
+                        </p>
+                      </div>
+                      {renderStatusBadge(r.status)}
+                    </CardHeader>
+                    <CardContent>
+                      <p className='text-sm text-muted-foreground'>
+                        Requested on: {new Date(r.createdAt).toLocaleString()}
+                      </p>
+                    </CardContent>
+                    {r.status === 'pending' && (
+                      <CardFooter className='flex justify-end gap-3'>
+                        <Button
+                          size='sm'
+                          onClick={() =>
+                            acceptRejectMutation.mutate({
+                              id: r.id,
+                              status: 'accepted',
+                            })
+                          }
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          size='sm'
+                          variant='destructive'
+                          onClick={() =>
+                            acceptRejectMutation.mutate({
+                              id: r.id,
+                              status: 'rejected',
+                            })
+                          }
+                        >
+                          Reject
+                        </Button>
+                      </CardFooter>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Sent Requests */}
+          <section className='bg-muted/30 rounded-xl p-6 shadow-sm'>
+            <h3 className='text-xl font-semibold mb-4 border-b pb-2 text-foreground'>
+              Requests You’ve Sent
+            </h3>
+            {myRequests.sent.length === 0 ? (
+              <div className='text-center py-12'>
+                <Inbox
+                  className='mx-auto mb-3 text-muted-foreground'
+                  size={40}
+                />
                 <p className='text-muted-foreground'>
                   You haven’t sent any requests yet.
                 </p>
               </div>
             ) : (
-              myRequests.map((r) => (
-                <Card
-                  key={r.id}
-                  className='hover:shadow-md transition-shadow border-muted'
-                >
-                  <CardHeader className='flex items-center justify-between'>
-                    <div>
-                      <p className='font-semibold text-lg'>{r.postTitle}</p>
+              <div className='grid md:grid-cols-2 gap-5'>
+                {myRequests.sent.map((r) => (
+                  <Card
+                    key={r.id}
+                    className='hover:shadow-lg transition-all border-border'
+                  >
+                    <CardHeader className='flex justify-between items-start'>
+                      <div>
+                        <h4 className='font-semibold text-lg'>
+                          {r.postTitle || 'Post Request'}
+                        </h4>
+                        <p className='text-sm text-muted-foreground'>
+                          Student: {r.studentName}
+                        </p>
+                      </div>
+                      {renderStatusBadge(r.status)}
+                    </CardHeader>
+                    <CardContent>
                       <p className='text-sm text-muted-foreground'>
-                        Student: {r.studentName}
+                        Requested on: {new Date(r.createdAt).toLocaleString()}
                       </p>
-                    </div>
-                    {renderStatusBadge(r.status)}
-                  </CardHeader>
-                  <CardContent>
-                    <p className='text-sm text-muted-foreground'>
-                      Requested on: {new Date(r.createdAt).toLocaleString()}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             )}
-          </div>
-        </section>
+          </section>
+        </>
       )}
 
-      {/* Student View */}
+      {/* STUDENT VIEW */}
       {user?.role === 'student' && (
-        <section className='mt-8'>
-          <h3 className='text-xl font-semibold mb-4 text-muted-foreground'>
+        <section className='bg-muted/30 rounded-xl p-6 shadow-sm'>
+          <h3 className='text-xl font-semibold mb-4 border-b pb-2 text-foreground'>
             Requests for Your Posts
           </h3>
-          <div className='grid gap-6'>
-            {postsRequests.length === 0 ? (
-              <div className='text-center py-10 border rounded-lg'>
-                <p className='text-muted-foreground'>
-                  You haven’t received any requests yet.
-                </p>
-              </div>
-            ) : (
-              postsRequests.map((block: any) => (
-                <div key={block.post.id}>
-                  <h4 className='font-semibold text-lg mb-2'>
-                    {block.post.title}
-                  </h4>
-                  <div className='grid gap-3'>
-                    {block.requests.map((r: any) => (
-                      <Card
-                        key={r.id}
-                        className='hover:shadow-md transition-shadow border-muted'
-                      >
-                        <CardHeader className='flex items-center justify-between'>
-                          <div>
-                            <p className='font-medium text-base'>
-                              Tutor: {r.tutorName}
-                            </p>
-                            <p className='text-sm text-muted-foreground'>
-                              Requested:{' '}
-                              {new Date(r.createdAt).toLocaleString()}
-                            </p>
-                          </div>
-                          {renderStatusBadge(r.status)}
-                        </CardHeader>
-                        {r.status === 'pending' && (
-                          <CardFooter className='flex justify-center gap-3 pt-2'>
-                            <Button
-                              size='sm'
-                              onClick={() =>
-                                acceptRejectMutation.mutate({
-                                  id: r.id,
-                                  status: 'accepted',
-                                })
-                              }
-                            >
-                              Accept
-                            </Button>
-                            <Button
-                              size='sm'
-                              variant='destructive'
-                              onClick={() =>
-                                acceptRejectMutation.mutate({
-                                  id: r.id,
-                                  status: 'rejected',
-                                })
-                              }
-                            >
-                              Reject
-                            </Button>
-                          </CardFooter>
-                        )}
-                      </Card>
-                    ))}
-                  </div>
+          {postsRequests.length === 0 ? (
+            <div className='text-center py-12'>
+              <Inbox className='mx-auto mb-3 text-muted-foreground' size={40} />
+              <p className='text-muted-foreground'>
+                You haven’t received any requests yet.
+              </p>
+            </div>
+          ) : (
+            postsRequests.map((block: any) => (
+              <div key={block.post.id} className='mb-6'>
+                <h4 className='font-semibold text-lg mb-3 text-foreground'>
+                  {block.post.title}
+                </h4>
+                <div className='grid md:grid-cols-2 gap-5'>
+                  {block.requests.map((r: any) => (
+                    <Card
+                      key={r.id}
+                      className='hover:shadow-lg transition-all border-border'
+                    >
+                      <CardHeader className='flex justify-between items-start'>
+                        <div>
+                          <p className='font-medium text-base'>
+                            Tutor: {r.tutorName}
+                          </p>
+                          <p className='text-sm text-muted-foreground'>
+                            Requested: {new Date(r.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                        {renderStatusBadge(r.status)}
+                      </CardHeader>
+                      {r.status === 'pending' && (
+                        <CardFooter className='flex justify-end gap-3'>
+                          <Button
+                            size='sm'
+                            onClick={() =>
+                              acceptRejectMutation.mutate({
+                                id: r.id,
+                                status: 'accepted',
+                              })
+                            }
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            size='sm'
+                            variant='destructive'
+                            onClick={() =>
+                              acceptRejectMutation.mutate({
+                                id: r.id,
+                                status: 'rejected',
+                              })
+                            }
+                          >
+                            Reject
+                          </Button>
+                        </CardFooter>
+                      )}
+                    </Card>
+                  ))}
                 </div>
-              ))
-            )}
-          </div>
+              </div>
+            ))
+          )}
         </section>
       )}
     </div>

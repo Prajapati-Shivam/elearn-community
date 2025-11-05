@@ -14,7 +14,9 @@ import {
   getRequestsForPost,
   getMyRequests,
   updateRequestStatus,
+  createLearningRequest,
 } from './controllers/requestController';
+import { updateUser, getTutors } from './controllers/userController';
 import { authMiddleware } from './middleware/auth';
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -37,12 +39,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Teach request routes
   // Tutor creates a request to teach a post
   app.post('/api/posts/:postId/requests', authMiddleware, createTeachRequest);
+  // Student creates a request to learn from a tutor (no post)
+  app.post('/api/requests', authMiddleware, createLearningRequest);
   // Student views requests for their post
   app.get('/api/posts/:postId/requests', authMiddleware, getRequestsForPost);
   // Tutor views their outgoing requests
   app.get('/api/requests', authMiddleware, getMyRequests);
   // Student accepts/rejects a request
   app.patch('/api/requests/:id', authMiddleware, updateRequestStatus);
+
+  // User routes
+  app.patch('/api/users/:id', authMiddleware, updateUser);
+  // Get tutors
+  app.get('/api/tutors', authMiddleware, getTutors);
 
   const httpServer = createServer(app);
 

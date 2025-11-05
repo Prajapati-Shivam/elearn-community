@@ -13,6 +13,7 @@ import Signup from '@/pages/Signup';
 import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
 import Requests from '@/pages/Requests';
+import Tutors from '@/pages/Tutors';
 
 function ProtectedRoute({
   component: Component,
@@ -25,6 +26,17 @@ function ProtectedRoute({
     return <Redirect to='/login' />;
   }
 
+  return <Component />;
+}
+
+function StudentRoute({
+  component: Component,
+}: {
+  component: () => JSX.Element | null;
+}) {
+  const { isAuthenticated, user } = useAuth();
+  if (!isAuthenticated) return <Redirect to='/login' />;
+  if (user?.role !== 'student') return <Redirect to='/dashboard' />;
   return <Component />;
 }
 
@@ -44,6 +56,9 @@ function Router() {
         </Route>
         <Route path='/requests'>
           {() => <ProtectedRoute component={Requests} />}
+        </Route>
+        <Route path='/tutors'>
+          {() => <StudentRoute component={Tutors} />}
         </Route>
         <Route component={NotFound} />
       </Switch>

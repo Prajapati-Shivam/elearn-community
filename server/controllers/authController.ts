@@ -10,6 +10,7 @@ function transformUser(user: any) {
     name: user.name,
     email: user.email,
     role: user.role,
+    subjects: user.subjects || [],
     createdAt: user.createdAt,
   };
 }
